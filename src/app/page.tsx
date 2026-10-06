@@ -1,24 +1,17 @@
-import { createClient } from '@/utils/supabase/server'
-import { cookies } from 'next/headers'
+import Link from 'next/link';
+import { ArrowRight } from "lucide-react";
 
-export default async function Page() {
-  const cookieStore = await cookies()
-  const supabase = createClient(cookieStore)
-  const { data, error } = await supabase.auth.getSession();
-
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24">
-      <h1 className="text-3xl font-bold mb-4">SOS Bixo - Teste Supabase</h1>
-
-      {error ? (
-        <div className="p-4 bg-red-100 text-red-700 rounded-md">
-          ❌ Erro ao conectar com o Supabase: {error.message}
-        </div>
-      ) : (
-        <div className="p-4 bg-green-100 text-green-700 rounded-md">
-          ✅ Conexão com o Supabase estabelecida com sucesso!
-        </div>
-      )}
-    </main>
-  );
+export default function Home() {
+    return (
+        <main className="flex min-h-screen flex-col items-center justify-center gap-6 bg-background px-6 text-foreground">
+            <h1 className="text-3xl font-semibold">SOS Bixos</h1>
+            <Link
+                href="/login"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-indigo-600 px-5 py-2.5 font-medium text-white transition-colors hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:focus-visible:ring-indigo-400 dark:focus-visible:ring-offset-neutral-950"
+            >
+                Fazer login
+                <ArrowRight aria-hidden="true" className="h-5 w-5" />
+            </Link>
+        </main>
+    );
 }

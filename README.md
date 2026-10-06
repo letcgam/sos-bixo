@@ -1,4 +1,5 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# sos-bixo
+Guia para calouros universitários.
 
 ## Getting Started
 
@@ -34,3 +35,27 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Login da equipe
+
+O painel usa Supabase Auth com e-mail e senha. Não há cadastro público: crie as contas da equipe no Supabase e atribua a cada conta o cargo `admin` ou `moderator` em `app_metadata`.
+
+Copie `.env.example` para `.env.local` e preencha os valores do seu projeto Supabase. Nunca exponha uma chave `service_role` no navegador ou em variáveis `NEXT_PUBLIC_*`.
+
+Para conceder um cargo, execute no SQL Editor do Supabase como administrador, substituindo o e-mail e o cargo:
+
+```sql
+update auth.users
+set raw_app_meta_data = coalesce(raw_app_meta_data, '{}'::jsonb) || '{"role":"admin"}'::jsonb
+where email = 'admin@example.com';
+```
+
+Use `"role":"moderator"` para moderadores. Após alterar o cargo, encerre a sessão da conta e entre novamente para atualizar as claims.
+
+Inicie o projeto:
+
+```bash
+npm run dev
+```
+
+O painel fica disponível em `/painel`. As páginas e actions devem validar a sessão e o cargo no servidor; proteger a navegação não substitui políticas RLS nos dados do Supabase.
