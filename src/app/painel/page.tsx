@@ -1,6 +1,7 @@
-import { LogOut, ShieldCheck } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import { signOutAction } from '@/app/actions/auth';
 import { Button } from '@/app/components/button';
+import { Logo } from '@/app/components/logo';
 import { requireStaff } from '@/lib/auth';
 
 export default async function PanelPage() {
@@ -13,10 +14,7 @@ export default async function PanelPage() {
                 <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-5 py-4">
                     <div className="flex items-center gap-3">
                         <div>
-                            <ShieldCheck aria-hidden="true" className="h-5 w-5" />
-                        </div>
-                        <div>
-                            <p className="font-semibold">SOS Bixos</p>
+                            <Logo />
                             <p className="text-xs text-slate-500 dark:text-slate-400">Painel da equipe</p>
                         </div>
                     </div>
