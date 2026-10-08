@@ -1,10 +1,9 @@
-import { LogOut, UsersRound } from 'lucide-react';
-import { signOutAction } from '@/app/actions/auth';
-import { Button } from '@/app/components/button';
 import { ColorModeToggle } from '@/app/components/color-mode-toggle';
-import { Logo } from '@/app/components/logo';
 import { requireStaff } from '@/lib/auth';
 import { listActiveAuthUsers } from '@/lib/supabase-admin';
+import { UsersRound, LogOut } from 'lucide-react';
+import { signOutAction } from '@/app/actions/auth';
+import { Button } from '@/app/components/button';
 
 function formatDate(value: string | null) {
     if (!value) return 'Nunca acessou';
@@ -85,25 +84,22 @@ export default async function PanelPage() {
 
     return (
         <main className="min-h-screen bg-slate-50 text-slate-900 dark:bg-neutral-950 dark:text-slate-100">
-            <header className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-                <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4">
-                    <div className="flex items-center gap-3">
-                        <div>
-                            <Logo />
-                            <p className="text-xs text-slate-500 dark:text-slate-400">Painel da equipe</p>
-                        </div>
-                    </div>
+            <section className="mx-auto max-w-6xl px-5 py-10">
+
+                <div className="flex justify-between gap-2 items-baseline">
+                    <h1 className="mt-2 text-3xl font-semibold">Minha conta</h1>
+
                     <form action={signOutAction}>
-                        <Button type="submit" variant="outline" size="sm" icon={LogOut}>
+                        <Button type="submit" variant="outline" size="sm" icon={LogOut} iconPosition="right">
                             Sair
                         </Button>
                     </form>
                 </div>
-            </header>
-
-            <section className="mx-auto max-w-6xl px-5 py-10">
-                <p className="text-sm font-medium text-indigo-700 dark:text-indigo-300">{roleLabel}</p>
-                <h1 className="mt-2 text-3xl font-semibold">Painel da equipe</h1>
+                {
+                    roleLabel
+                    ? <p className="text-sm font-medium text-indigo-700 dark:text-indigo-300">{roleLabel}</p>
+                    : ""
+                }
                 <p className="mt-3 text-slate-600 dark:text-slate-400">Sessão iniciada como {staff.email}.</p>
 
                 <section aria-labelledby="settings-heading" className="mt-9 border-y border-slate-200 py-5 dark:border-slate-800">
