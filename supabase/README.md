@@ -49,6 +49,7 @@ Este fluxo copia para sua máquina a estrutura do banco remoto (tabelas, colunas
 	```
 
 	Coloque em `.env.local` a URL e a chave pública locais (anon key) exibidas por supabase status e reinicie npm run dev.
+	Para a listagem de contas no painel, copie também a `service_role key` local do `supabase status` para `SUPABASE_SECRET_KEY` em `.env.local`. Essa chave é somente do servidor: nunca use o prefixo `NEXT_PUBLIC_` nem a envie ao navegador.
    	Abra o Supabase Studio local em [http://127.0.0.1:54323](http://127.0.0.1:54323). Use Table Editor para ver as tabelas e SQL Editor para executar consultas.
 
 ### Atualizar o banco local a partir do remoto

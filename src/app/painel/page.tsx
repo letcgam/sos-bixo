@@ -1,17 +1,92 @@
-import { LogOut } from 'lucide-react';
+import { LogOut, UsersRound } from 'lucide-react';
 import { signOutAction } from '@/app/actions/auth';
 import { Button } from '@/app/components/button';
+import { ColorModeToggle } from '@/app/components/color-mode-toggle';
 import { Logo } from '@/app/components/logo';
 import { requireStaff } from '@/lib/auth';
+import { listActiveAuthUsers } from '@/lib/supabase-admin';
+
+function formatDate(value: string | null) {
+    if (!value) return 'Nunca acessou';
+
+    return new Intl.DateTimeFormat('pt-BR', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+    }).format(new Date(value));
+}
+
+function ActiveUsersList({ result }: Readonly<{
+    result: Awaited<ReturnType<typeof listActiveAuthUsers>>;
+}>) {
+    if (result.error) {
+        return (
+            <p role="alert" className="border-y border-amber-300 py-5 text-sm text-amber-900 dark:border-amber-800 dark:text-amber-200">
+                {result.error}
+            </p>
+        );
+    }
+
+    if (result.users.length === 0) {
+        return (
+            <p className="border-y border-slate-200 py-5 text-sm text-slate-600 dark:border-slate-800 dark:text-slate-400">
+                Nenhuma conta ativa encontrada.
+            </p>
+        );
+    }
+
+    return (
+        <div className="overflow-x-auto border-y border-slate-200 dark:border-slate-800">
+            <table className="w-full min-w-170 text-left text-sm">
+                <thead className="text-xs uppercase text-slate-500 dark:text-slate-400">
+                    <tr>
+                        <th scope="col" className="py-3 pr-5 font-medium">Conta</th>
+                        <th scope="col" className="px-5 py-3 font-medium">Cargo</th>
+                        <th scope="col" className="px-5 py-3 font-medium">Criada em</th>
+                        <th scope="col" className="py-3 pl-5 font-medium">Último acesso</th>
+                    </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+                    {result.users.map((user) => (
+                        <tr key={user.id}>
+                            <td className="py-4 pr-5">
+                                <p className="font-medium text-slate-900 dark:text-slate-100">
+                                    {user.name || user.email}
+                                </p>
+                                {user.name && (
+                                    <p className="mt-0.5 text-slate-600 dark:text-slate-400">{user.email}</p>
+                                )}
+                            </td>
+                            <td className="px-5 py-4 text-slate-700 dark:text-slate-300">
+                                {user.role === 'admin' ? 'Administrador' : 'Moderador'}
+                            </td>
+                            <td className="whitespace-nowrap px-5 py-4 text-slate-600 dark:text-slate-400">
+                                <time dateTime={user.createdAt}>{formatDate(user.createdAt)}</time>
+                            </td>
+                            <td className="whitespace-nowrap py-4 pl-5 text-slate-600 dark:text-slate-400">
+                                {user.lastSignInAt ? (
+                                    <time dateTime={user.lastSignInAt}>{formatDate(user.lastSignInAt)}</time>
+                                ) : (
+                                    'Nunca acessou'
+                                )}
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    );
+}
 
 export default async function PanelPage() {
     const staff = await requireStaff();
     const roleLabel = staff.role === 'admin' ? 'Administrador' : 'Moderador';
+    const usersResult = staff.role === 'admin' ? await listActiveAuthUsers() : null;
 
     return (
         <main className="min-h-screen bg-slate-50 text-slate-900 dark:bg-neutral-950 dark:text-slate-100">
             <header className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-                <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-5 py-4">
+                <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4">
                     <div className="flex items-center gap-3">
                         <div>
                             <Logo />
@@ -26,10 +101,50 @@ export default async function PanelPage() {
                 </div>
             </header>
 
-            <section className="mx-auto max-w-5xl px-5 py-12">
+            <section className="mx-auto max-w-6xl px-5 py-10">
                 <p className="text-sm font-medium text-indigo-700 dark:text-indigo-300">{roleLabel}</p>
-                <h1 className="mt-2 text-3xl font-semibold tracking-tight">Bem-vindo ao painel</h1>
+                <h1 className="mt-2 text-3xl font-semibold">Painel da equipe</h1>
                 <p className="mt-3 text-slate-600 dark:text-slate-400">Sessão iniciada como {staff.email}.</p>
+
+                <section aria-labelledby="settings-heading" className="mt-9 border-y border-slate-200 py-5 dark:border-slate-800">
+                    <h2 id="settings-heading" className="text-lg font-semibold">Configurações</h2>
+                    <div className="mt-4 flex items-center justify-between gap-6">
+                        <div>
+                            <h3 className="text-sm font-medium">Aparência</h3>
+                            <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                                Escolha entre o modo claro e o modo escuro.
+                            </p>
+                        </div>
+                        <ColorModeToggle />
+                    </div>
+                </section>
+
+                <section aria-labelledby="active-users-heading" className="mt-12">
+                    <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
+                        <div>
+                            <div className="flex items-center gap-2">
+                                <UsersRound aria-hidden="true" className="h-5 w-5 text-indigo-700 dark:text-indigo-300" />
+                                <h2 id="active-users-heading" className="text-xl font-semibold">Usuários ativos</h2>
+                            </div>
+                            <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                                Contas da equipe habilitadas para acessar o painel.
+                            </p>
+                        </div>
+                        {usersResult && !usersResult.error && (
+                            <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                                {usersResult.users.length} {usersResult.users.length === 1 ? 'usuário' : 'usuários'}
+                            </p>
+                        )}
+                    </div>
+
+                    {usersResult ? (
+                        <ActiveUsersList result={usersResult} />
+                    ) : (
+                        <p className="border-y border-slate-200 py-5 text-sm text-slate-600 dark:border-slate-800 dark:text-slate-400">
+                            A lista de contas está disponível apenas para administradores.
+                        </p>
+                    )}
+                </section>
             </section>
         </main>
     );
