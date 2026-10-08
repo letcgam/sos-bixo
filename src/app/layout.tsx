@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Google_Sans } from "next/font/google";
 import { ThemeProvider } from "@/app/components/theme-provider";
+import Header from "@/app/components/header";
 import "./globals.css";
 
 const googleSans = Google_Sans({
@@ -18,9 +19,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="pt-BR"
       className={`${googleSans.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <Header />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
