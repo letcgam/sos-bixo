@@ -11,28 +11,103 @@ export type ActiveAuthUser = {
     lastSignInAt: string | null;
 };
 
+export type StaffProfileSummary = {
+    name: string;
+    campus: {
+        nome: string | null,
+        cidade: string | null,
+        estado: string | null,
+        logoUrl: string | null,
+        endereco: string | null
+    },
+    universidade: {
+        nome: string | null,
+        sigla: string | null,
+        logoUrl: string | null
+    }
+};
+
 const USERS_PER_PAGE = 1000;
 
-export async function listActiveAuthUsers(): Promise<{
-    users: ActiveAuthUser[];
-    error: string | null;
-}> {
+function createAdminClient() {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const secretKey = process.env.SUPABASE_SECRET_KEY;
 
-    if (!supabaseUrl || !secretKey) {
-        return {
-            users: [],
-            error: 'Configure NEXT_PUBLIC_SUPABASE_URL e SUPABASE_SECRET_KEY no ambiente do servidor.',
-        };
-    }
+    if (!supabaseUrl || !secretKey) return null;
 
-    const supabase = createClient(supabaseUrl, secretKey, {
+    return createClient(supabaseUrl, secretKey, {
         auth: {
             autoRefreshToken: false,
             persistSession: false,
         },
     });
+}
+
+export async function getStaffProfileSummary(
+    userId: string,
+): Promise<StaffProfileSummary | null> {
+    const supabase = createAdminClient();
+    if (!supabase) return null;
+
+    const { data, error } = await supabase
+        .from('perfil')
+        .select(`
+            nome,
+            campus:campi!aluno_campi_id_fkey (
+                nome,
+                cidade,
+                estado,
+                endereço,
+                logo_url,
+                universidade:universidade!campi_universidade_id_fkey (
+                    nome,
+                    sigla,
+                    logo_url
+                )
+            )
+        `)
+        .eq('id', userId)
+        .maybeSingle();
+
+    if (error || !data) return null;
+
+    const campus = data.campus || null;
+    const universidade = campus?.universidade || null;
+
+    // return data;
+    return {
+        nome: data.nome,
+        campus: campus
+            ? {
+                nome: campus.nome || null,
+                cidade: campus.cidade || null,
+                estado: campus.estado || null,
+                logoUrl: campus.logo_url || null,
+                endereco: campus.endereco || null
+            }
+            : null,
+        universidade: universidade
+            ? {
+                nome: universidade.nome || null,
+                sigla: universidade.sigla || null,
+                logoUrl: universidade.logo_url || null
+            }
+            : null,
+    };
+}
+
+export async function listActiveAuthUsers(): Promise<{
+    users: ActiveAuthUser[];
+    error: string | null;
+}> {
+    const supabase = createAdminClient();
+
+    if (!supabase) {
+        return {
+            users: [],
+            error: 'Configure NEXT_PUBLIC_SUPABASE_URL e SUPABASE_SECRET_KEY no ambiente do servidor.',
+        };
+    }
 
     const users: ActiveAuthUser[] = [];
 

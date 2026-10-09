@@ -1,6 +1,6 @@
 import { ColorModeToggle } from '@/app/components/color-mode-toggle';
 import { requireStaff } from '@/lib/auth';
-import { listActiveAuthUsers } from '@/lib/supabase-admin';
+import { getStaffProfileSummary, listActiveAuthUsers } from '@/lib/supabase-admin';
 import { UsersRound, LogOut } from 'lucide-react';
 import { signOutAction } from '@/app/actions/auth';
 import { Button } from '@/app/components/button';
@@ -79,6 +79,7 @@ function ActiveUsersList({ result }: Readonly<{
 
 export default async function PanelPage() {
     const staff = await requireStaff();
+    const profile = await getStaffProfileSummary(staff.id);
     const roleLabel = staff.role === 'admin' ? 'Administrador' : 'Moderador';
     const usersResult = staff.role === 'admin' ? await listActiveAuthUsers() : null;
 
@@ -87,7 +88,9 @@ export default async function PanelPage() {
             <section className="mx-auto max-w-6xl px-5 py-10">
 
                 <div className="flex justify-between gap-2 items-baseline">
-                    <h1 className="mt-2 text-3xl font-semibold">Minha conta</h1>
+                    <h1 className="mt-2 text-3xl font-semibold">
+                        Olá, {profile?.nome || staff.email}
+                    </h1>
 
                     <form action={signOutAction}>
                         <Button type="submit" variant="outline" size="sm" icon={LogOut} iconPosition="right">
@@ -100,7 +103,11 @@ export default async function PanelPage() {
                     ? <p className="text-sm font-medium text-indigo-700 dark:text-indigo-300">{roleLabel}</p>
                     : ""
                 }
-                <p className="mt-3 text-slate-600 dark:text-slate-400">Sessão iniciada como {staff.email}.</p>
+                <p className="mt-2 text-slate-600 dark:text-slate-400">
+                    {/* <pre>{JSON.stringify(profile, null, 2)}</pre> */}
+                    {[profile?.campus?.nome, profile?.universidade?.nome].filter(Boolean).join(' · ') || 'Instituição não informada no perfil.'}
+                </p>
+                <p className="mt-1 text-sm text-slate-500 dark:text-slate-500">{staff.email}</p>
 
                 <section aria-labelledby="settings-heading" className="mt-9 border-y border-slate-200 py-5 dark:border-slate-800">
                     <h2 id="settings-heading" className="text-lg font-semibold">Configurações</h2>
