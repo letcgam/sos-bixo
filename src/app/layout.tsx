@@ -3,6 +3,9 @@ import { Google_Sans } from "next/font/google";
 import { ThemeProvider } from "@/app/components/theme-provider";
 import Header from "@/app/components/header";
 import "./globals.css";
+import { cookies } from 'next/headers';
+import { createClient } from '@/utils/supabase/server';
+import { isStaffRole } from '@/lib/auth';
 
 const googleSans = Google_Sans({
   variable: "--font-google-sans",
@@ -14,7 +17,11 @@ export const metadata: Metadata = {
   description: "Guia para integração de novos ingressantes da faculdade.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const supabase = createClient(await cookies());
+  const { data: { user } } = await supabase.auth.getUser();
+  const isStaff = isStaffRole(user?.app_metadata?.role);
+  
   return (
     <html
       lang="pt-BR"
@@ -23,7 +30,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <ThemeProvider>
-          <Header />
+          <Header isStaff={isStaff}/>
           {children}
         </ThemeProvider>
       </body>

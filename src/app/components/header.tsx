@@ -1,15 +1,13 @@
-import { cookies } from 'next/headers';
+'use client';
+
+import { usePathname } from 'next/navigation';
 import { Button } from '@/app/components/button';
 import { Logo } from '@/app/components/logo';
 import Link from 'next/link';
-import { createClient } from '@/utils/supabase/server';
-import { ArrowRight } from 'lucide-react';
-import { isStaffRole } from '@/lib/auth';
+import { ArrowRight, House } from 'lucide-react';
 
-export default async function Header() {
-    const supabase = createClient(await cookies());
-    const { data: { user } } = await supabase.auth.getUser();
-    const isStaff = isStaffRole(user?.app_metadata?.role);
+export default function Header({ isStaff = false }: { readonly isStaff: boolean }) {
+    const pathname = usePathname();
 
     return (
         <header className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
@@ -21,15 +19,21 @@ export default async function Header() {
                         </Link>
                     </div>
                 </div>
-                {isStaff ? (
-                    <Link href="/painel">
-                        <Button size="sm" variant="outline" icon={ArrowRight}>Minha conta</Button>
-                    </Link>
-                ) : (
+                {isStaff ?
+                    (
+                        pathname === '/painel'
+                        ? <Link href="/">
+                            <Button size="sm" variant="outline" icon={House}>Página inicial</Button>
+                        </Link>
+                        : <Link href="/painel">
+                            <Button size="sm" variant="outline" icon={ArrowRight}>Minha conta</Button>
+                        </Link>
+                    )
+                :
                     <Link href="/login">
                         <Button size="sm" variant="primary" icon={ArrowRight}>Login</Button>
                     </Link>
-                )}
+                }
             </div>
         </header>
     );
