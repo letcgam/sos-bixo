@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { ColorModeToggle } from '@/app/components/color-mode-toggle';
 import { requireStaff } from '@/lib/auth';
 import { getStaffProfileSummary, listActiveAuthUsers } from '@/lib/supabase-admin';
@@ -82,6 +83,7 @@ export default async function PanelPage() {
     const profile = await getStaffProfileSummary(staff.id);
     const roleLabel = staff.role === 'admin' ? 'Administrador' : 'Moderador';
     const usersResult = staff.role === 'admin' ? await listActiveAuthUsers() : null;
+    const logoInstituicao = profile?.campus?.logo_url || profile?.universidade?.logo_url || "";
 
     return (
         <main className="min-h-screen bg-slate-50 text-slate-900 dark:bg-neutral-950 dark:text-slate-100">
@@ -103,11 +105,19 @@ export default async function PanelPage() {
                     ? <p className="text-sm font-medium text-indigo-700 dark:text-indigo-300">{roleLabel}</p>
                     : ""
                 }
-                <p className="mt-2 text-slate-600 dark:text-slate-400">
-                    {/* <pre>{JSON.stringify(profile, null, 2)}</pre> */}
-                    {[profile?.campus?.nome, profile?.universidade?.nome].filter(Boolean).join(' · ') || 'Instituição não informada no perfil.'}
-                </p>
                 <p className="mt-1 text-sm text-slate-500 dark:text-slate-500">{staff.email}</p>
+
+                <div className="flex gap-2 items-start">
+                    {
+                        logoInstituicao
+                        ? <Image src={logoInstituicao} width={40} height={40} alt="Logo da instituição" className="object-contain aspect-square p-1" />
+                        : null
+                    }
+                    <p className="mt-2 text-slate-600 dark:text-slate-400">
+                        { profile?.campus?.nome || profile?.universidade?.nome }
+                    </p>
+                </div>
+                {/* <pre>{JSON.stringify(profile, null, 2)}</pre> */}
 
                 <section aria-labelledby="settings-heading" className="mt-9 border-y border-slate-200 py-5 dark:border-slate-800">
                     <h2 id="settings-heading" className="text-lg font-semibold">Configurações</h2>

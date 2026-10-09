@@ -17,13 +17,13 @@ export type StaffProfileSummary = {
         nome: string | null,
         cidade: string | null,
         estado: string | null,
-        logoUrl: string | null,
+        logo_url: string | null,
         endereco: string | null
     },
     universidade: {
         nome: string | null,
         sigla: string | null,
-        logoUrl: string | null
+        logo_url: string | null
     }
 };
 
@@ -57,7 +57,7 @@ export async function getStaffProfileSummary(
                 nome,
                 cidade,
                 estado,
-                endereço,
+                endereco,
                 logo_url,
                 universidade:universidade!campi_universidade_id_fkey (
                     nome,
@@ -69,7 +69,7 @@ export async function getStaffProfileSummary(
         .eq('id', userId)
         .maybeSingle();
 
-    if (error || !data) return null;
+    if (error || !data) return error;
 
     const campus = data.campus || null;
     const universidade = campus?.universidade || null;
@@ -77,22 +77,8 @@ export async function getStaffProfileSummary(
     // return data;
     return {
         nome: data.nome,
-        campus: campus
-            ? {
-                nome: campus.nome || null,
-                cidade: campus.cidade || null,
-                estado: campus.estado || null,
-                logoUrl: campus.logo_url || null,
-                endereco: campus.endereco || null
-            }
-            : null,
-        universidade: universidade
-            ? {
-                nome: universidade.nome || null,
-                sigla: universidade.sigla || null,
-                logoUrl: universidade.logo_url || null
-            }
-            : null,
+        campus: campus || null,
+        universidade: universidade || null,
     };
 }
 
